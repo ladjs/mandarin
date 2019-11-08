@@ -9,6 +9,8 @@
 
 > Automatic i18n phrase translation using Google Translate
 
+> _NOTE_: As of v1.0.0 we now use the official Node.js Google Translate package `@google-cloud/translate`
+
 
 ## Table of Contents
 
@@ -43,10 +45,29 @@ yarn add mandarin
 
    const i18n = new I18N();
 
-   // you can also pass a custom `logger` option (it defaults to `console`)
-   const mandarin = new Mandarin({ i18n });
+   //
+   // OPTIONAL:
+   // see all commented options from this following link:
+   // https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html
+   //
+   const clientConfig = {};
 
-   // with promises
+   // you can also pass a custom `logger` option (it defaults to `console`)
+   const mandarin = new Mandarin({
+    i18n,        // required
+    clientConfig // optional
+   });
+
+   // with async/await
+   (async () => {
+     try {
+       await mandarin.translate();
+     } catch (err) {
+       console.log(err);
+     }
+   })();
+
+   // with promises and then/catch
    mandarin
      .translate()
      .then(() => {
@@ -63,12 +84,12 @@ yarn add mandarin
 
 2. This assumes that you have locale files already and a default locale file (e.g. `./locales/en.json` with phrases that need translated to other languages you support). Based off the defaults from [i18n][], you would automatically get your `en.json` file translated to the locales `es` (Spanish) and `zh` (Chinese).
 
-3. Retrieve your Google Translate API key from <https://console.developers.google.com>
+3. Follow the "Before you begin" steps here <https://cloud.google.com/translate/docs/basic/setup-basic> (basically you download a JSON file after creating a Google Cloud Project with Cloud Translation API enabled).
 
-4. Replace `******` with the value of your key (this also assumes your script file above is named `app.js`):
+4. Specify the path to the JSON file and run your script that uses `mandarin`:
 
    ```sh
-   GOOGLE_TRANSLATE_KEY=****** node app.js
+   GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/[FILE_NAME].json" node app.js
    ```
 
 

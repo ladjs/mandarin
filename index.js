@@ -1,19 +1,49 @@
 const path = require('path');
 const fs = require('fs');
-const { promisify } = require('util');
 
 const _ = require('lodash');
+const emoji = require('remark-emoji');
+const globby = require('globby');
+const modifyFilename = require('modify-filename');
 const pMapSeries = require('p-map-series');
+const pify = require('pify');
+const remark = require('remark');
+const remarkPresetGitHub = require('remark-preset-github');
+const textr = require('remark-textr');
 const { v2 } = require('@google-cloud/translate');
 
-const writeFile = promisify(fs.writeFile);
+const readFile = pify(fs.readFile);
+const writeFile = pify(fs.writeFile);
 
 class Mandarin {
   constructor(config = {}) {
     this.config = {
       i18n: false,
       logger: console,
+      //
+      // OPTIONAL:
+      // see all commented options from this following link:
+      // https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html
+      //
       clientConfig: {},
+      //
+      // Files to convert from `index.md` to `index-es.md`
+      // Or `README.md` to `README-ZH.md` for example
+      // https://github.com/sindresorhus/globby
+      //
+      markdown: {
+        patterns: [
+          '*.md',
+          '**/*.md',
+          '!*-*.md',
+          '!test',
+          '!coverage',
+          '!node_modules'
+        ],
+        options: {
+          gitignore: true
+        }
+      },
       ...config
     };
 
@@ -23,6 +53,63 @@ class Mandarin {
     this.client = new v2.Translate(this.config.clientConfig);
 
     this.translate = this.translate.bind(this);
+    this.markdown = this.markdown.bind(this);
+    this.parseMarkdownFile = this.parseMarkdownFile.bind(this);
+    this.getLocalizedMarkdownFileName = this.getLocalizedMarkdownFileName.bind(
+      this
+    );
+  }
+
+  getLocalizedMarkdownFileName(filePath, locale) {
+    return modifyFilename(filePath, (filename, extension) => {
+      const isUpperCase = filename.toUpperCase() === filename;
+      return `${filename}-${
+        isUpperCase ? locale.toUpperCase() : locale.toLowerCase()
+      }${extension}`;
+    });
+  }
+
+  async parseMarkdownFile(filePath) {
+    const markdown = await readFile(filePath);
+    // don't translate the main file.md file, only for other locales
+    const locales = this.config.i18n.config.locales.filter(
+      locale => locale !== this.config.i18n.config.defaultLocale
+    );
+    const files = await Promise.all(
+      locales.map(locale => {
+        return new Promise((resolve, reject) => {
+          remark()
+            .use(remarkPresetGitHub)
+            .use(emoji)
+            .use(textr, {
+              plugins: [phrase => this.config.i18n.api.t({ phrase, locale })]
+            })
+            .process(markdown, (err, content) => {
+              if (err) return reject(err);
+              resolve({ locale, content });
+            });
+        });
+      })
+    );
+    await Promise.all(
+      files.map(async file => {
+        await writeFile(
+          this.getLocalizedMarkdownFileName(filePath, file.locale),
+          file.content
+        );
+      })
+    );
+  }
+
+  async markdown() {
+    // if title is all uppercase then `-EN` otherwise `-en`
+    const filePaths = await globby(
+      this.config.markdown.patterns,
+      this.config.markdown.options
+    );
+    await Promise.all(
+      filePaths.map(filePath => this.parseMarkdownFile(filePath))
+    );
   }
 
   async translate() {

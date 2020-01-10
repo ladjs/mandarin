@@ -7,7 +7,7 @@
 [![made with lass](https://img.shields.io/badge/made_with-lass-95CC28.svg)](https://lass.js.org)
 [![license](https://img.shields.io/github/license/niftylettuce/mandarin.svg)](LICENSE)
 
-> Automatic i18n phrase translation using Google Translate
+> Automatic i18n markdown translation and i18n phrase translation using Google Translate
 
 > _NOTE_: As of v1.0.0 we now use the official Node.js Google Translate package `@google-cloud/translate`
 
@@ -45,19 +45,40 @@ yarn add mandarin
 
    const i18n = new I18N();
 
-   //
-   // OPTIONAL:
-   // see all commented options from this following link:
-   // https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html
-   //
-   const clientConfig = {};
-
    // you can also pass a custom `logger` option (it defaults to `console`)
    const mandarin = new Mandarin({
-    i18n,        // required
-    clientConfig // optional
+    // required
+    i18n,
+    //
+    // OPTIONAL:
+    // see all commented options from this following link:
+    // <https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html>
+    //
+    clientConfig: {},
+    //
+    // OPTIONAL:
+    // Files to convert from `index.md` to `index-es.md`
+    // Or `README.md` to `README-ZH.md` for example
+    // <https://github.com/sindresorhus/globby>
+    //
+    markdown: {
+      patterns: [
+        '*.md',
+        '**/*.md',
+        '!*-*.md',
+        '!test',
+        '!coverage',
+        '!node_modules'
+      ],
+      options: {
+        gitignore: true
+      }
+    }
    });
 
+   //
+   // Translate Phrases
+   //
    // with async/await
    (async () => {
      try {
@@ -80,6 +101,32 @@ yarn add mandarin
      if (err) throw err;
      console.log('done');
    });
+
+   //
+   // Translate Markdown Files
+   //
+   // with async/await
+   (async () => {
+     try {
+       await mandarin.markdown();
+     } catch (err) {
+       console.log(err);
+     }
+   })();
+
+   // with promises and then/catch
+   mandarin
+     .markdown()
+     .then(() => {
+       console.log('done');
+     })
+     .catch(console.error);
+
+   // with callbacks
+   mandarin.markdown(err => {
+     if (err) throw err;
+     console.log('done');
+   });
    ```
 
 2. This assumes that you have locale files already and a default locale file (e.g. `./locales/en.json` with phrases that need translated to other languages you support). Based off the defaults from [i18n][], you would automatically get your `en.json` file translated to the locales `es` (Spanish) and `zh` (Chinese).
@@ -88,9 +135,9 @@ yarn add mandarin
 
 4. Specify the path to the JSON file and run your script that uses `mandarin`:
 
-   ```sh
-   GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/[FILE_NAME].json" node app.js
-   ```
+```sh
+GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/[FILE_NAME].json" node app.js
+```
 
 
 ## Contributors

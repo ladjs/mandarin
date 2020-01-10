@@ -1,6 +1,6 @@
 {
   "name": "mandarin",
-  "description": "Automatic i18n phrase translation using Google Translate",
+  "description": "Automatic i18n markdown translation and i18n phrase translation using Google Translate",
   "version": "1.0.1",
   "author": "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)",
   "ava": {
@@ -20,14 +20,21 @@
     "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)"
   ],
   "dependencies": {
-    "@google-cloud/translate": "^5.0.2",
+    "@google-cloud/translate": "^5.1.4",
+    "globby": "^11.0.0",
     "lodash": "^4.17.15",
-    "p-map-series": "^2.1.0"
+    "modify-filename": "^1.1.0",
+    "p-map-series": "^2.1.0",
+    "pify": "^4.0.1",
+    "remark": "^11.0.2",
+    "remark-emoji": "^2.0.2",
+    "remark-preset-github": "^0.0.16",
+    "remark-textr": "^3.0.4"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
-    "@ladjs/i18n": "^1.2.1",
+    "@ladjs/i18n": "^3.0.1",
     "ava": "latest",
     "codecov": "latest",
     "cross-env": "latest",
@@ -39,7 +46,6 @@
     "lint-staged": "latest",
     "nyc": "latest",
     "remark-cli": "latest",
-    "remark-preset-github": "latest",
     "xo": "latest"
   },
   "engines": {

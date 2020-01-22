@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
+const Redis = require('@ladjs/redis');
 const _ = require('lodash');
 const emoji = require('remark-emoji');
 const globby = require('globby');
@@ -10,47 +11,69 @@ const pMapSeries = require('p-map-series');
 const pify = require('pify');
 const remark = require('remark');
 const remarkPresetGitHub = require('remark-preset-github');
+const revHash = require('rev-hash');
+const sharedConfig = require('@ladjs/shared-config');
 const textr = require('remark-textr');
 const { v2 } = require('@google-cloud/translate');
 
 const isoCodes = Object.keys(languages.getAlpha2Codes());
 const readFile = pify(fs.readFile);
 const writeFile = pify(fs.writeFile);
+const conf = _.pick(sharedConfig('MANDARIN'), [
+  'logger',
+  'redis',
+  'redisMonitor'
+]);
 
 class Mandarin {
   constructor(config = {}) {
-    this.config = {
-      i18n: false,
-      logger: console,
-      //
-      // OPTIONAL:
-      // see all commented options from this following link:
-      // https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html
-      //
-      clientConfig: {},
-      //
-      // Files to convert from `index.md` to `index-es.md`
-      // Or `README.md` to `README-ZH.md` for example
-      // https://github.com/sindresorhus/globby
-      //
-      markdown: {
-        patterns: [
-          '*.md',
-          '**/*.md',
-          ...isoCodes.map(code => `!*-${code}.md`),
-          ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
-          '!test',
-          '!coverage',
-          '!node_modules'
-        ],
-        options: {
-          gitignore: true
+    this.config = _.merge(
+      {
+        ..._.merge(conf, {
+          redis: {
+            prefix: `mandarin_${(
+              process.env.NODE_ENV || 'development'
+            ).toLowerCase()}`
+          }
+        }),
+        i18n: false,
+        //
+        // OPTIONAL:
+        // see all commented options from this following link:
+        // https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html
+        //
+        clientConfig: {},
+        //
+        // Files to convert from `index.md` to `index-es.md`
+        // Or `README.md` to `README-ZH.md` for example
+        // https://github.com/sindresorhus/globby
+        //
+        markdown: {
+          patterns: [
+            '*.md',
+            '**/*.md',
+            ...isoCodes.map(code => `!*-${code}.md`),
+            ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
+            '!test',
+            '!coverage',
+            '!node_modules'
+          ],
+          options: {
+            gitignore: true
+          }
         }
       },
-      ...config
-    };
+      config
+    );
 
     if (!this.config.i18n) throw new Error('i18n instance option required');
+
+    // setup redis
+    this.redisClient = new Redis(
+      this.config.redis,
+      this.config.logger,
+      this.config.redisMonitor
+    );
 
     // setup google translate with api key
     this.client = new v2.Translate(this.config.clientConfig);
@@ -174,8 +197,15 @@ class Mandarin {
         // TODO: also prevent {{...}} from getting translated
         // by wrapping such with `<span class="notranslate">`?
 
+        // lookup translation result from cache
+        const key = `${locale}:${revHash(phrase)}`;
+        let translation = await this.redisClient.get(key);
+
         // get the translation results from Google
-        const [translation] = await this.client.translate(phrase, locale);
+        if (!_.isString(translation)) {
+          [translation] = await this.client.translate(phrase, locale);
+          await this.redisClient.set(key, translation);
+        }
 
         // replace `|` pipe character because translation will
         // interpret as ranged interval

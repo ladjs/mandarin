@@ -22,6 +22,8 @@
   "dependencies": {
     "@cospired/i18n-iso-languages": "^2.1.0",
     "@google-cloud/translate": "^5.1.4",
+    "@ladjs/redis": "^1.0.3",
+    "@ladjs/shared-config": "^1.0.1",
     "globby": "^11.0.0",
     "lodash": "^4.17.15",
     "modify-filename": "^1.1.0",
@@ -30,16 +32,18 @@
     "remark": "^11.0.2",
     "remark-emoji": "^2.0.2",
     "remark-preset-github": "^0.0.16",
-    "remark-textr": "^3.0.4"
+    "remark-textr": "^3.0.4",
+    "rev-hash": "^3.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "@ladjs/i18n": "^3.0.1",
-    "ava": "latest",
+    "ava": "2.x",
     "codecov": "latest",
     "cross-env": "latest",
     "del": "^5.1.0",
+    "delay": "^4.3.0",
     "eslint": "latest",
     "eslint-config-xo-lass": "latest",
     "fixpack": "latest",
@@ -47,7 +51,7 @@
     "lint-staged": "latest",
     "nyc": "latest",
     "remark-cli": "latest",
-    "xo": "latest"
+    "xo": "^0.25.3"
   },
   "engines": {
     "node": ">=8.3"

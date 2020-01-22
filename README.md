@@ -9,12 +9,15 @@
 
 > Automatic i18n markdown translation and i18n phrase translation using Google Translate
 
-> _NOTE_: As of v1.0.0 we now use the official Node.js Google Translate package `@google-cloud/translate`
+> **v2.0.0**: We have integrated Redis as a requirement for caching Google Translate responses (to save you money)
+>
+> **v1.0.0**: We now use the official Node.js Google Translate package `@google-cloud/translate`
 
 
 ## Table of Contents
 
 * [Install](#install)
+* [Requirements](#requirements)
 * [Usage](#usage)
 * [Contributors](#contributors)
 * [License](#license)
@@ -35,6 +38,11 @@ yarn add mandarin
 ```
 
 
+## Requirements
+
+You will need to have [Redis][] installed.
+
+
 ## Usage
 
 1. Implement Mandarin and pass it an instance of [i18n][]
@@ -42,41 +50,36 @@ yarn add mandarin
    ```js
    const Mandarin = require('mandarin');
    const I18N = require('@ladjs/i18n');
-   // const languages = require('@cospired/i18n-iso-languages');
-   // const isoCodes = Object.keys(languages.getAlpha2Codes());
 
    const i18n = new I18N();
 
    // you can also pass a custom `logger` option (it defaults to `console`)
    const mandarin = new Mandarin({
-    // required
-    i18n,
-    //
+
+    // REQUIRED:
+    i18n
+
+    // OPTIONAL:
+    // logger: console,
+
+    // OPTIONAL (see index.js for defaults):
+    // redis: ...
+
+    // OPTIONAL (see index.js for defaults):
+    // redisMonitor: ...
+
     // OPTIONAL:
     // see all commented options from this following link:
     // <https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html>
     //
-    clientConfig: {},
-    //
-    // OPTIONAL:
+    // clientConfig: {},
+
+    // OPTIONAL (see index.js for defaults):
     // Files to convert from `index.md` to `index-es.md`
     // Or `README.md` to `README-ZH.md` for example
     // <https://github.com/sindresorhus/globby>
     //
-    // markdown: {
-    //   patterns: [
-    //     '*.md',
-    //     '**/*.md',
-    //     ...isoCodes.map(code => `!*-${code}.md`),
-    //     ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
-    //     '!test',
-    //     '!coverage',
-    //     '!node_modules'
-    //   ],
-    //   options: {
-    //     gitignore: true
-    //   }
-    // }
+    // markdown: ...
    });
 
    //
@@ -162,3 +165,5 @@ GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/[FILE_NAME].json" node app.
 [yarn]: https://yarnpkg.com/
 
 [i18n]: https://github.com/ladjs/i18n
+
+[redis]: https://redis.io/

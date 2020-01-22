@@ -42,6 +42,8 @@ yarn add mandarin
    ```js
    const Mandarin = require('mandarin');
    const I18N = require('@ladjs/i18n');
+   // const languages = require('@cospired/i18n-iso-languages');
+   // const isoCodes = Object.keys(languages.getAlpha2Codes());
 
    const i18n = new I18N();
 
@@ -61,19 +63,20 @@ yarn add mandarin
     // Or `README.md` to `README-ZH.md` for example
     // <https://github.com/sindresorhus/globby>
     //
-    markdown: {
-      patterns: [
-        '*.md',
-        '**/*.md',
-        '!*-*.md',
-        '!test',
-        '!coverage',
-        '!node_modules'
-      ],
-      options: {
-        gitignore: true
-      }
-    }
+    // markdown: {
+    //   patterns: [
+    //     '*.md',
+    //     '**/*.md',
+    //     ...isoCodes.map(code => `!*-${code}.md`),
+    //     ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
+    //     '!test',
+    //     '!coverage',
+    //     '!node_modules'
+    //   ],
+    //   options: {
+    //     gitignore: true
+    //   }
+    // }
    });
 
    //

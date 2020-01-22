@@ -4,6 +4,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const emoji = require('remark-emoji');
 const globby = require('globby');
+const languages = require('@cospired/i18n-iso-languages');
 const modifyFilename = require('modify-filename');
 const pMapSeries = require('p-map-series');
 const pify = require('pify');
@@ -12,6 +13,7 @@ const remarkPresetGitHub = require('remark-preset-github');
 const textr = require('remark-textr');
 const { v2 } = require('@google-cloud/translate');
 
+const isoCodes = Object.keys(languages.getAlpha2Codes());
 const readFile = pify(fs.readFile);
 const writeFile = pify(fs.writeFile);
 
@@ -35,7 +37,8 @@ class Mandarin {
         patterns: [
           '*.md',
           '**/*.md',
-          '!*-*.md',
+          ...isoCodes.map(code => `!*-${code}.md`),
+          ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
           '!test',
           '!coverage',
           '!node_modules'

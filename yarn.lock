@@ -427,6 +427,11 @@
   dependencies:
     arrify "^1.0.1"
 
+"@cospired/i18n-iso-languages@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@cospired/i18n-iso-languages/-/i18n-iso-languages-2.1.0.tgz#82a6fb13ff9146bd86beae7f0ed9271278615d22"
+  integrity sha512-r+bqdtVTkO8R07JiBxEc7ckbkXgeIP/X51MxqxODv9gZovc/MBDS6uJVCHg+mtJuldwvSD6L0XF5RzH6qyAacQ==
+
 "@google-cloud/common@^2.0.0":
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/@google-cloud/common/-/common-2.2.5.tgz#6b8667dd0d01784f815ad9a0b779391bdaa58043"

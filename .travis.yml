@@ -4,6 +4,8 @@ node_js:
 - '12'
 - 'lts/*'
 - 'node'
+services:
+  - redis-server
 after_success: npm run coverage
 env:
 - GOOGLE_APPLICATION_CREDENTIALS=$TRAVIS_BUILD_DIR/client_secrets.json

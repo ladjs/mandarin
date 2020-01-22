@@ -25,6 +25,16 @@ const conf = _.pick(sharedConfig('MANDARIN'), [
   'redisMonitor'
 ]);
 
+const DEFAULT_PATTERNS = [
+  '**/*.md',
+  '!*.md',
+  ...isoCodes.map(code => `!*-${code}.md`),
+  ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
+  '!test',
+  '!coverage',
+  '!node_modules'
+];
+
 class Mandarin {
   constructor(config = {}) {
     this.config = _.merge(
@@ -49,15 +59,7 @@ class Mandarin {
         // https://github.com/sindresorhus/globby
         //
         markdown: {
-          patterns: [
-            '*.md',
-            '**/*.md',
-            ...isoCodes.map(code => `!*-${code}.md`),
-            ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
-            '!test',
-            '!coverage',
-            '!node_modules'
-          ],
+          patterns: DEFAULT_PATTERNS,
           options: {
             gitignore: true
           }
@@ -221,5 +223,7 @@ class Mandarin {
     });
   }
 }
+
+Mandarin.DEFAULT_PATTERNS = DEFAULT_PATTERNS;
 
 module.exports = Mandarin;

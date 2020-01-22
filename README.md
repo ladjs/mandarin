@@ -79,7 +79,7 @@ You will need to have [Redis][] installed.
     // Or `README.md` to `README-ZH.md` for example
     // <https://github.com/sindresorhus/globby>
     //
-    // markdown: ...
+    // markdown: ... (note we expose `Mandarin.DEFAULT_PATTERNS` for you)
    });
 
    //

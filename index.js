@@ -4,6 +4,7 @@ const fs = require('fs');
 const Redis = require('@ladjs/redis');
 const _ = require('lodash');
 const emoji = require('remark-emoji');
+const formatSpecifiers = require('format-specifiers');
 const globby = require('globby');
 const languages = require('@cospired/i18n-iso-languages');
 const modifyFilename = require('modify-filename');
@@ -192,10 +193,17 @@ class Mandarin {
 
       // attempt to translate all of these in the given language
       await pMapSeries(translationsRequired, async phrase => {
-        // TODO: prevent %s %d and %j from getting translated
+        // prevent %s %d and %j from getting translated
         // <https://nodejs.org/api/util.html#util_util_format_format>
         // <https://github.com/nodejs/node/issues/17601>
-        //
+        let safePhrase = phrase;
+        for (const element of formatSpecifiers) {
+          safePhrase = safePhrase.replace(
+            new RegExp(element, 'g'),
+            `<span class="notranslate">${element}</span>`
+          );
+        }
+
         // TODO: also prevent {{...}} from getting translated
         // by wrapping such with `<span class="notranslate">`?
 
@@ -205,7 +213,7 @@ class Mandarin {
 
         // get the translation results from Google
         if (!_.isString(translation)) {
-          [translation] = await this.client.translate(phrase, locale);
+          [translation] = await this.client.translate(safePhrase, locale);
           await this.redisClient.set(key, translation);
         }
 

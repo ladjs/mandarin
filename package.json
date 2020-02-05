@@ -1,7 +1,7 @@
 {
   "name": "mandarin",
   "description": "Automatic i18n markdown translation and i18n phrase translation using Google Translate",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)",
   "ava": {
     "failFast": true,

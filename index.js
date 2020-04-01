@@ -31,6 +31,8 @@ const DEFAULT_PATTERNS = [
   '!*.md',
   ...isoCodes.map(code => `!*-${code}.md`),
   ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
+  ...isoCodes.map(code => `!**/*-${code}.md`),
+  ...isoCodes.map(code => `!**/*-${code.toUpperCase()}.md`),
   '!test',
   '!coverage',
   '!node_modules'

@@ -426,7 +426,7 @@
   dependencies:
     arrify "^1.0.1"
 
-"@cospired/i18n-iso-languages@^2.1.0":
+"@cospired/i18n-iso-languages@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@cospired/i18n-iso-languages/-/i18n-iso-languages-2.1.1.tgz#f6b671cbb6ab40cf8778fefe00a7d8921cae8f2e"
   integrity sha512-dmlPmVw51tQzCJkYvtWWXxuvsAkNvCmUnvjMWyo7Qd318YeEZalCUInUgdhKU985gk2wkITtdakPYqk5GrJ99A==
@@ -456,10 +456,10 @@
   resolved "https://registry.yarnpkg.com/@google-cloud/promisify/-/promisify-1.0.4.tgz#ce86ffa94f9cfafa2e68f7b3e4a7fad194189723"
   integrity sha512-VccZDcOql77obTnFh0TbNED/6ZbbmHDf8UMNnzO1d5g9V0Htfm4k5cllY8P1tJsRKC3zWYGRLaViiupcgVjBoQ==
 
-"@google-cloud/translate@^5.1.4":
-  version "5.1.4"
-  resolved "https://registry.yarnpkg.com/@google-cloud/translate/-/translate-5.1.4.tgz#9c342a6d0ddd9d009d6e969e47aace13a4a6249c"
-  integrity sha512-vO/qFVKEEhs/HJ42D5sRtRVaHEzte5M9n1yuY6B8odOEVt5J6QQpDqI5NeCJQN6JLdXl1FDUxGBUKvofsYOa6Q==
+"@google-cloud/translate@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/translate/-/translate-5.3.0.tgz#478c9918a78b5dec066dd6fd0429adc8a86516fb"
+  integrity sha512-bQmPe7LYiPNM7F6m0IzoDxG1FqQJdjq5PboOpXt+OBOUR7UKNmAfn8nMVOdKNZTlA7nQdQwX/YKd2wQT2h1d9g==
   dependencies:
     "@google-cloud/common" "^2.0.0"
     "@google-cloud/promisify" "^1.0.0"
@@ -512,7 +512,7 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.2.tgz#26520bf09abe4a5644cd5414e37125a8954241dd"
   integrity sha512-tsAQNx32a8CoFhjhijUIhI4kccIAgmGhy8LZMZgGfmXcpMbPRUqn5LWmgRttILi6yeGmBJd2xsPkFMs0PzgPCw==
 
-"@ladjs/i18n@^3.0.1":
+"@ladjs/i18n@^3.0.4":
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/@ladjs/i18n/-/i18n-3.0.4.tgz#9998c6bef7f0b213e848ba44e1a5a1c574e67f4f"
   integrity sha512-b6aL/9T16ynvFUZFlsJ4VmKyjqb3jbCv+SOS5pkaAnfXiID/HWtPUlLHKK47SEjLmRJLiIyblVccjNyE/brRaw==

@@ -117,7 +117,7 @@ class Mandarin {
             })
             .process(markdown, (err, content) => {
               if (err) return reject(err);
-              resolve({ locale, content });
+              resolve({ locale, content: String(content) });
             });
         });
       })

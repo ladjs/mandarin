@@ -15,6 +15,7 @@ const remarkPresetGitHub = require('remark-preset-github');
 const revHash = require('rev-hash');
 const sharedConfig = require('@ladjs/shared-config');
 const textr = require('remark-textr');
+const universalify = require('universalify');
 const { v2 } = require('@google-cloud/translate');
 
 const isoCodes = Object.keys(languages.getAlpha2Codes());
@@ -83,11 +84,13 @@ class Mandarin {
     // setup google translate with api key
     this.client = new v2.Translate(this.config.clientConfig);
 
-    this.translate = this.translate.bind(this);
-    this.markdown = this.markdown.bind(this);
-    this.parseMarkdownFile = this.parseMarkdownFile.bind(this);
-    this.getLocalizedMarkdownFileName = this.getLocalizedMarkdownFileName.bind(
-      this
+    this.translate = universalify.fromPromise(this.translate.bind(this));
+    this.markdown = universalify.fromPromise(this.markdown.bind(this));
+    this.parseMarkdownFile = universalify.fromPromise(
+      this.parseMarkdownFile.bind(this)
+    );
+    this.getLocalizedMarkdownFileName = universalify.fromPromise(
+      this.getLocalizedMarkdownFileName.bind(this)
     );
   }
 

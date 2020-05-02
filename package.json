@@ -34,7 +34,8 @@
     "remark-emoji": "^2.0.2",
     "remark-preset-github": "^0.0.16",
     "remark-textr": "^3.0.4",
-    "rev-hash": "^3.0.0"
+    "rev-hash": "^3.0.0",
+    "universalify": "^1.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",

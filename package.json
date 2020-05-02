@@ -20,8 +20,8 @@
     "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)"
   ],
   "dependencies": {
-    "@cospired/i18n-iso-languages": "^2.1.0",
-    "@google-cloud/translate": "^5.1.4",
+    "@cospired/i18n-iso-languages": "^2.1.1",
+    "@google-cloud/translate": "^5.3.0",
     "@ladjs/redis": "^1.0.3",
     "@ladjs/shared-config": "^1.0.1",
     "format-specifiers": "^1.0.0",
@@ -34,12 +34,13 @@
     "remark-emoji": "^2.0.2",
     "remark-preset-github": "^0.0.16",
     "remark-textr": "^3.0.4",
-    "rev-hash": "^3.0.0"
+    "rev-hash": "^3.0.0",
+    "universalify": "^1.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
-    "@ladjs/i18n": "^3.0.1",
+    "@ladjs/i18n": "^3.0.4",
     "ava": "2.x",
     "codecov": "latest",
     "cross-env": "latest",

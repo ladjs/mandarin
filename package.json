@@ -40,7 +40,7 @@
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
-    "@ladjs/i18n": "^3.0.4",
+    "@ladjs/i18n": "^3.0.10",
     "ava": "2.x",
     "codecov": "latest",
     "cross-env": "latest",

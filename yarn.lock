@@ -424,12 +424,12 @@
     qs "^6.9.4"
     titleize "^2.1.0"
 
-"@ladjs/redis@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@ladjs/redis/-/redis-1.0.3.tgz#4232bfea8af56c07a7b43e651c1f0762e888e917"
-  integrity sha512-oO/vSfhkMkxwtnx4oXZtE8zIhOz2sAC+AdoAsPtRBedO5qvUqARIffUcu5TMtK4ubI2Dq3wm+TA0cDN1euzY1g==
+"@ladjs/redis@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@ladjs/redis/-/redis-1.0.4.tgz#b225d508943d6a5b65e757e1fe4c19adda41f6c3"
+  integrity sha512-2PgOsLIQ9taJ3B4fhG6RXZQjKh5r7BkoQpQ7iIwreOPoLwCjCiLWuSempJbY3nwnxx1+TyOI2yRPPUcxPdssdA==
   dependencies:
-    ioredis "^4.14.0"
+    ioredis "^4.17.1"
 
 "@ladjs/shared-config@^2.0.13":
   version "2.0.13"
@@ -3193,10 +3193,10 @@ inquirer@^7.0.0:
     strip-ansi "^6.0.0"
     through "^2.3.6"
 
-ioredis@^4.14.0:
-  version "4.16.3"
-  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.16.3.tgz#6a6b85830206fd98353b7ff8536521f17943be53"
-  integrity sha512-Ejvcs2yW19Vq8AipvbtfcX3Ig8XG9EAyFOvGbhI/Q1QoVOK9ZdgY092kdOyOWIYBnPHjfjMJhU9qhsnp0i0K1w==
+ioredis@^4.17.1:
+  version "4.17.1"
+  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.17.1.tgz#06ef3d3b2cb96b7e6bc90a7b8839a33e743843ad"
+  integrity sha512-kfxkN/YO1dnyaoAGyNdH3my4A1eoGDy4QOfqn6o86fo4dTboxyxYVW0S0v/d3MkwCWlvSWhlwq6IJMY9BlWs6w==
   dependencies:
     cluster-key-slot "^1.1.0"
     debug "^4.1.1"

@@ -132,6 +132,7 @@ class Mandarin {
     );
     await Promise.all(
       files.map(async file => {
+        debug('writing file', filePath);
         await writeFile(
           this.getLocalizedMarkdownFileName(filePath, file.locale),
           file.content
@@ -244,6 +245,7 @@ class Mandarin {
         file[phrase] = translation.replace(/\|/g, '&#124;');
 
         // write the file again
+        debug('writing filePath', filePath, 'with translation', translation);
         await writeFile(filePath, JSON.stringify(file, null, 2));
       });
 

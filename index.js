@@ -3,6 +3,7 @@ const fs = require('fs');
 
 const Redis = require('@ladjs/redis');
 const _ = require('lodash');
+const debug = require('debug')('mandarin');
 const emoji = require('remark-emoji');
 const formatSpecifiers = require('format-specifiers');
 const globby = require('globby');
@@ -72,6 +73,8 @@ class Mandarin {
       config
     );
 
+    debug(this.config);
+
     if (!this.config.i18n) throw new Error('i18n instance option required');
 
     // setup redis
@@ -84,17 +87,18 @@ class Mandarin {
     // setup google translate with api key
     this.client = new v2.Translate(this.config.clientConfig);
 
-    this.translate = universalify.fromPromise(this.translate.bind(this));
-    this.markdown = universalify.fromPromise(this.markdown.bind(this));
-    this.parseMarkdownFile = universalify.fromPromise(
-      this.parseMarkdownFile.bind(this)
-    );
-    this.getLocalizedMarkdownFileName = universalify.fromPromise(
-      this.getLocalizedMarkdownFileName.bind(this)
-    );
+    this.translate = universalify.fromPromise(this.translate).bind(this);
+    this.markdown = universalify.fromPromise(this.markdown).bind(this);
+    this.parseMarkdownFile = universalify
+      .fromPromise(this.parseMarkdownFile)
+      .bind(this);
+    this.getLocalizedMarkdownFileName = universalify
+      .fromPromise(this.getLocalizedMarkdownFileName)
+      .bind(this);
   }
 
   getLocalizedMarkdownFileName(filePath, locale) {
+    debug('getLocalizedMarkdownFileName', filePath, locale);
     return modifyFilename(filePath, (filename, extension) => {
       const isUpperCase = filename.toUpperCase() === filename;
       return `${filename}-${
@@ -104,6 +108,7 @@ class Mandarin {
   }
 
   async parseMarkdownFile(filePath) {
+    debug('parseMarkdownFile', filePath);
     const markdown = await readFile(filePath);
     // don't translate the main file.md file, only for other locales
     const locales = this.config.i18n.config.locales.filter(
@@ -141,6 +146,7 @@ class Mandarin {
       this.config.markdown.patterns,
       this.config.markdown.options
     );
+    debug('markdown', filePaths);
     await Promise.all(
       filePaths.map(filePath => this.parseMarkdownFile(filePath))
     );
@@ -168,6 +174,7 @@ class Mandarin {
     }
 
     return pMapSeries(i18n.config.locales, async locale => {
+      debug('locale', locale);
       const filePath = path.join(i18n.config.directory, `${locale}.json`);
 
       // look up the file, and if it does not exist, then
@@ -196,6 +203,8 @@ class Mandarin {
 
       if (translationsRequired.length === 0) return file;
 
+      debug('translationsRequired', translationsRequired);
+
       // attempt to translate all of these in the given language
       await pMapSeries(translationsRequired, async phrase => {
         // prevent %s %d and %j from getting translated
@@ -209,16 +218,22 @@ class Mandarin {
           );
         }
 
+        debug('phrase', phrase);
+        debug('safePhrase', safePhrase);
+
         // TODO: also prevent {{...}} from getting translated
         // by wrapping such with `<span class="notranslate">`?
 
         // lookup translation result from cache
         const key = `${locale}:${revHash(phrase)}`;
         let translation = await this.redisClient.get(key);
+        debug('translation', translation);
 
         // get the translation results from Google
         if (!_.isString(translation)) {
+          debug('getting translation', key);
           [translation] = await this.client.translate(safePhrase, locale);
+          debug('got translation', translation);
           await this.redisClient.set(key, translation);
         }
 

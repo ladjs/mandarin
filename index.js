@@ -5,7 +5,7 @@ const Redis = require('@ladjs/redis');
 const _ = require('lodash');
 const debug = require('debug')('mandarin');
 const emoji = require('remark-emoji');
-const formatSpecifiers = require('format-specifiers');
+// const formatSpecifiers = require('format-specifiers');
 const globby = require('globby');
 const languages = require('@cospired/i18n-iso-languages');
 const modifyFilename = require('modify-filename');
@@ -208,16 +208,22 @@ class Mandarin {
 
       // attempt to translate all of these in the given language
       await pMapSeries(translationsRequired, async phrase => {
+        const safePhrase = phrase;
+        //
+        // TODO: note that this will corrupt `<a href="%s"`>`
+        // so I have turned it off for now until we have a better parser
+        //
+        /*
         // prevent %s %d and %j from getting translated
         // <https://nodejs.org/api/util.html#util_util_format_format>
         // <https://github.com/nodejs/node/issues/17601>
-        let safePhrase = phrase;
         for (const element of formatSpecifiers) {
           safePhrase = safePhrase.replace(
             new RegExp(element, 'g'),
             `<span class="notranslate">${element}</span>`
           );
         }
+        */
 
         debug('phrase', phrase);
         debug('safePhrase', safePhrase);

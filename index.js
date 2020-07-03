@@ -46,7 +46,7 @@ class Mandarin {
       {
         ..._.merge(conf, {
           redis: {
-            prefix: `mandarin_${(
+            keyPrefix: `mandarin_${(
               process.env.NODE_ENV || 'development'
             ).toLowerCase()}`
           }

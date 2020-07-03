@@ -61,7 +61,7 @@
   "homepage": "https://github.com/niftylettuce/mandarin",
   "husky": {
     "hooks": {
-      "pre-commit": "npm test",
+      "pre-commit": "lint-staged",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },

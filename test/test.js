@@ -7,7 +7,7 @@ const delay = require('delay');
 
 const Mandarin = require('..');
 
-test('translates a basic phrase to multiple languages', async t => {
+test('translates a basic phrase to multiple languages', async (t) => {
   await del(path.join(__dirname, '..', 'locales'));
   const i18n = new I18N({ autoReload: true });
   const hello = i18n.api.t({ phrase: 'Hello', locale: 'en' });

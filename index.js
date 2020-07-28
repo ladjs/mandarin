@@ -31,10 +31,10 @@ const conf = _.pick(sharedConfig('MANDARIN'), [
 const DEFAULT_PATTERNS = [
   '**/*.md',
   '!*.md',
-  ...isoCodes.map(code => `!*-${code}.md`),
-  ...isoCodes.map(code => `!*-${code.toUpperCase()}.md`),
-  ...isoCodes.map(code => `!**/*-${code}.md`),
-  ...isoCodes.map(code => `!**/*-${code.toUpperCase()}.md`),
+  ...isoCodes.map((code) => `!*-${code}.md`),
+  ...isoCodes.map((code) => `!*-${code.toUpperCase()}.md`),
+  ...isoCodes.map((code) => `!**/*-${code}.md`),
+  ...isoCodes.map((code) => `!**/*-${code.toUpperCase()}.md`),
   '!test',
   '!coverage',
   '!node_modules'
@@ -112,16 +112,16 @@ class Mandarin {
     const markdown = await readFile(filePath);
     // don't translate the main file.md file, only for other locales
     const locales = this.config.i18n.config.locales.filter(
-      locale => locale !== this.config.i18n.config.defaultLocale
+      (locale) => locale !== this.config.i18n.config.defaultLocale
     );
     const files = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return new Promise((resolve, reject) => {
           remark()
             .use(remarkPresetGitHub)
             .use(emoji)
             .use(textr, {
-              plugins: [phrase => this.config.i18n.api.t({ phrase, locale })]
+              plugins: [(phrase) => this.config.i18n.api.t({ phrase, locale })]
             })
             .process(markdown, (err, content) => {
               if (err) return reject(err);
@@ -131,7 +131,7 @@ class Mandarin {
       })
     );
     await Promise.all(
-      files.map(async file => {
+      files.map(async (file) => {
         debug('writing file', filePath);
         await writeFile(
           this.getLocalizedMarkdownFileName(filePath, file.locale),
@@ -149,7 +149,7 @@ class Mandarin {
     );
     debug('markdown', filePaths);
     await Promise.all(
-      filePaths.map(filePath => this.parseMarkdownFile(filePath))
+      filePaths.map((filePath) => this.parseMarkdownFile(filePath))
     );
   }
 
@@ -174,7 +174,7 @@ class Mandarin {
       defaultLocaleFile = {};
     }
 
-    return pMapSeries(i18n.config.locales, async locale => {
+    return pMapSeries(i18n.config.locales, async (locale) => {
       debug('locale', locale);
       const filePath = path.join(i18n.config.directory, `${locale}.json`);
 
@@ -207,7 +207,7 @@ class Mandarin {
       debug('translationsRequired', translationsRequired);
 
       // attempt to translate all of these in the given language
-      await pMapSeries(translationsRequired, async phrase => {
+      await pMapSeries(translationsRequired, async (phrase) => {
         const safePhrase = phrase;
         //
         // TODO: note that this will corrupt `<a href="%s"`>`

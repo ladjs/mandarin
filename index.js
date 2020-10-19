@@ -1,26 +1,29 @@
 const path = require('path');
 const fs = require('fs');
 
+// const formatSpecifiers = require('format-specifiers');
 const Redis = require('@ladjs/redis');
 const _ = require('lodash');
 const debug = require('debug')('mandarin');
 const emoji = require('remark-emoji');
-// const formatSpecifiers = require('format-specifiers');
 const globby = require('globby');
 const languages = require('@cospired/i18n-iso-languages');
 const modifyFilename = require('modify-filename');
 const pMapSeries = require('p-map-series');
+const parse = require('remark-parse');
 const pify = require('pify');
-const remark = require('remark');
+const remark2rehype = require('remark-rehype');
 const remarkPresetGitHub = require('remark-preset-github');
 const revHash = require('rev-hash');
 const sharedConfig = require('@ladjs/shared-config');
+const stringify = require('rehype-stringify');
 const textr = require('remark-textr');
+const unified = require('unified');
 const universalify = require('universalify');
+const vfile = require('to-vfile');
 const { v2 } = require('@google-cloud/translate');
 
 const isoCodes = Object.keys(languages.getAlpha2Codes());
-const readFile = pify(fs.readFile);
 const writeFile = pify(fs.writeFile);
 const conf = _.pick(sharedConfig('MANDARIN'), [
   'logger',
@@ -109,7 +112,7 @@ class Mandarin {
 
   async parseMarkdownFile(filePath) {
     debug('parseMarkdownFile', filePath);
-    const markdown = await readFile(filePath);
+    const markdown = await vfile.read(filePath);
     // don't translate the main file.md file, only for other locales
     const locales = this.config.i18n.config.locales.filter(
       (locale) => locale !== this.config.i18n.config.defaultLocale
@@ -117,15 +120,18 @@ class Mandarin {
     const files = await Promise.all(
       locales.map((locale) => {
         return new Promise((resolve, reject) => {
-          remark()
+          unified()
+            .use(parse)
             .use(remarkPresetGitHub)
             .use(emoji)
             .use(textr, {
               plugins: [(phrase) => this.config.i18n.api.t({ phrase, locale })]
             })
-            .process(markdown, (err, content) => {
+            .use(remark2rehype)
+            .use(stringify)
+            .process(markdown, (err, file) => {
               if (err) return reject(err);
-              resolve({ locale, content: String(content) });
+              resolve({ locale, content: String(file) });
             });
         });
       })

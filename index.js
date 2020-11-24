@@ -4,19 +4,20 @@ const fs = require('fs');
 // const formatSpecifiers = require('format-specifiers');
 const Redis = require('@ladjs/redis');
 const _ = require('lodash');
+const autoLinkHeadings = require('remark-autolink-headings');
 const debug = require('debug')('mandarin');
 const emoji = require('remark-emoji');
 const globby = require('globby');
+const html = require('remark-html');
 const languages = require('@cospired/i18n-iso-languages');
 const modifyFilename = require('modify-filename');
 const pMapSeries = require('p-map-series');
 const parse = require('remark-parse');
 const pify = require('pify');
-const remark2rehype = require('remark-rehype');
 const remarkPresetGitHub = require('remark-preset-github');
 const revHash = require('rev-hash');
 const sharedConfig = require('@ladjs/shared-config');
-const stringify = require('rehype-stringify');
+const slug = require('remark-slug');
 const textr = require('remark-textr');
 const unified = require('unified');
 const universalify = require('universalify');
@@ -123,12 +124,23 @@ class Mandarin {
           unified()
             .use(parse)
             .use(remarkPresetGitHub)
-            .use(emoji)
             .use(textr, {
               plugins: [(phrase) => this.config.i18n.api.t({ phrase, locale })]
             })
-            .use(remark2rehype)
-            .use(stringify)
+            .use(slug)
+            .use(autoLinkHeadings, {
+              behavior: 'prepend',
+              content: {
+                type: 'element',
+                tagName: 'i',
+                properties: {
+                  className: ['fa', 'fa-link', 'mr-2', 'text-dark']
+                },
+                children: []
+              }
+            })
+            .use(emoji)
+            .use(html)
             .process(markdown, (err, file) => {
               if (err) return reject(err);
               resolve({ locale, content: String(file) });

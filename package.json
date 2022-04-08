@@ -24,7 +24,7 @@
     "@google-cloud/translate": "^6.0.4",
     "@ladjs/redis": "^1.0.7",
     "@ladjs/shared-config": "^3.0.9",
-    "debug": "^4.3.1",
+    "debug": "^4.3.4",
     "globby": "^11.0.1",
     "lodash": "^4.17.20",
     "modify-filename": "^1.1.0",

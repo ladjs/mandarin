@@ -39,7 +39,7 @@
     "remark-textr": "^4.0.0",
     "rev-hash": "^3.0.0",
     "to-vfile": "^6.1.0",
-    "unified": "^9.2.0",
+    "unified": "^9.2.2",
     "universalify": "^2.0.0"
   },
   "devDependencies": {

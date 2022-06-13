@@ -20,6 +20,9 @@ jobs:
         run: .github/scripts/decrypt_secret.sh
         env:
           LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
+      - name: Set environment variable
+        run: |
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/secrets/my_secret.json" >> $GITHUB_ENV
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -27,6 +30,4 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run tests
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: $HOME/secrets/my_secret.json
         run: npm run test

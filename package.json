@@ -3,12 +3,8 @@
   "description": "Automatic i18n markdown translation and i18n phrase translation using Google Translate",
   "version": "4.2.0",
   "author": "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)",
-  "ava": {
-    "failFast": true,
-    "verbose": true
-  },
   "bugs": {
-    "url": "https://github.com/niftylettuce/mandarin/issues",
+    "url": "https://github.com/ladjs/mandarin/issues",
     "email": "niftylettuce@gmail.com"
   },
   "commitlint": {
@@ -20,56 +16,52 @@
     "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)"
   ],
   "dependencies": {
-    "@cospired/i18n-iso-languages": "^2.1.2",
-    "@google-cloud/translate": "^6.0.4",
+    "@commitlint/cli": "^17.0.2",
+    "@commitlint/config-conventional": "^17.0.2",
+    "@cospired/i18n-iso-languages": "^4.0.0",
+    "@google-cloud/translate": "^6.3.1",
     "@ladjs/redis": "^1.0.7",
-    "@ladjs/shared-config": "^3.0.9",
-    "debug": "^4.3.1",
-    "globby": "^11.0.1",
-    "lodash": "^4.17.20",
-    "modify-filename": "^1.1.0",
-    "p-map-series": "^2.1.0",
-    "pify": "^5.0.0",
-    "remark-autolink-headings": "^6.0.1",
-    "remark-emoji": "^2.1.0",
-    "remark-html": "^13.0.1",
-    "remark-parse": "^9.0.0",
-    "remark-preset-github": "^4.0.1",
-    "remark-slug": "^6.0.0",
-    "remark-textr": "^4.0.0",
-    "rev-hash": "^3.0.0",
-    "to-vfile": "^6.1.0",
-    "unified": "^9.2.0",
+    "@ladjs/shared-config": "^7.0.3",
+    "cross-env": "^7.0.3",
+    "debug": "^4.3.4",
+    "eslint-config-xo-lass": "^2.0.1",
+    "fixpack": "^4.0.0",
+    "globby": "11",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.1",
+    "lodash": "^4.17.21",
+    "modify-filename": "1",
+    "nyc": "^15.1.0",
+    "p-map-series": "2",
+    "pify": "5",
+    "remark-autolink-headings": "6",
+    "remark-cli": "^10.0.1",
+    "remark-emoji": "2",
+    "remark-html": "13",
+    "remark-parse": "9",
+    "remark-preset-github": "^4.0.4",
+    "remark-slug": "6",
+    "remark-textr": "4",
+    "rev-hash": "3",
+    "to-vfile": "6",
+    "unified": "9",
     "universalify": "^2.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "latest",
-    "@commitlint/config-conventional": "latest",
-    "@ladjs/i18n": "^7.0.1",
-    "ava": "^3.13.0",
-    "codecov": "latest",
-    "cross-env": "latest",
-    "del": "^6.0.0",
-    "delay": "^4.4.0",
-    "eslint": "^7.14.0",
-    "eslint-config-xo-lass": "latest",
-    "fixpack": "latest",
-    "husky": "latest",
-    "lint-staged": "latest",
-    "nyc": "latest",
-    "remark-cli": "latest",
-    "xo": "^0.35.0"
+    "@ladjs/i18n": "^7.2.6",
+    "ava": "^4.3.0",
+    "del": "^6.1.1",
+    "delay": "^5.0.0",
+    "eslint": "^8.17.0",
+    "xo": "^0.50.0"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   },
-  "homepage": "https://github.com/niftylettuce/mandarin",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
+  "files": [
+    "index.js"
+  ],
+  "homepage": "https://github.com/ladjs/mandarin",
   "keywords": [
     "agenda",
     "auto",
@@ -106,44 +98,17 @@
     "words"
   ],
   "license": "MIT",
-  "lint-staged": {
-    "*.{js,jsx,mjs,ts,tsx,css,less,scss,json,graphql}": [
-      "prettier --write --single-quote --trailing-comma none",
-      "git add"
-    ],
-    "*.md": [
-      "remark . -qfo",
-      "git add"
-    ]
-  },
   "main": "index.js",
-  "prettier": {
-    "singleQuote": true,
-    "bracketSpacing": true,
-    "trailingComma": "none"
-  },
-  "remarkConfig": {
-    "plugins": [
-      "preset-github"
-    ]
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/niftylettuce/mandarin"
+    "url": "https://github.com/ladjs/mandarin"
   },
   "scripts": {
-    "ava": "cross-env NODE_ENV=test ava",
-    "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "lint": "xo && remark . -qfo",
+    "lint": "xo --fix && remark . -qfo && fixpack",
     "nyc": "cross-env NODE_ENV=test nyc ava",
-    "test": "npm run lint && npm run ava",
-    "test-coverage": "npm run lint && npm run nyc"
-  },
-  "xo": {
-    "prettier": true,
-    "space": true,
-    "extends": [
-      "xo-lass"
-    ]
+    "prepare": "husky install",
+    "pretest": "npm run lint",
+    "test": "npm run test-coverage",
+    "test-coverage": "cross-env NODE_ENV=test nyc ava"
   }
 }

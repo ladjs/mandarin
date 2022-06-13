@@ -1,5 +1,6 @@
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const process = require('process');
 
 // const formatSpecifiers = require('format-specifiers');
 const Redis = require('@ladjs/redis');
@@ -57,6 +58,9 @@ class Mandarin {
         }),
         i18n: false,
         //
+        // NOTE: you can pass `GOOGLE_APPLICATION_CREDENTIALS` as an environment variable
+        //       or you can pass individual environment variables
+        //
         // OPTIONAL:
         // see all commented options from this following link:
         // https://googleapis.dev/nodejs/translate/5.0.1/v2_index.js.html
@@ -81,12 +85,17 @@ class Mandarin {
 
     if (!this.config.i18n) throw new Error('i18n instance option required');
 
-    // setup redis
-    this.redisClient = new Redis(
-      this.config.redis,
-      this.config.logger,
-      this.config.redisMonitor
-    );
+    // initialize redis
+    this.redisClient =
+      this.config.redis === false
+        ? false
+        : _.isPlainObject(this.config.redis)
+        ? new Redis(
+            this.config.redis,
+            this.config.logger,
+            this.config.redisMonitor
+          )
+        : this.config.redis;
 
     // setup google translate with api key
     this.client = new v2.Translate(this.config.clientConfig);
@@ -214,9 +223,10 @@ class Mandarin {
       if (locale === i18n.config.defaultLocale) return file;
 
       const translationsRequired = _.intersection(
-        _.uniq(
-          _.concat(_.values(i18n.config.phrases), _.values(defaultLocaleFile))
-        ),
+        _.uniq([
+          ..._.values(i18n.config.phrases),
+          ..._.values(defaultLocaleFile)
+        ]),
         _.values(file)
       );
 
@@ -251,7 +261,8 @@ class Mandarin {
 
         // lookup translation result from cache
         const key = `${locale}:${revHash(phrase)}`;
-        let translation = await this.redisClient.get(key);
+        let translation;
+        if (this.redisClient) translation = await this.redisClient.get(key);
         debug('translation', translation);
 
         // get the translation results from Google
@@ -259,7 +270,7 @@ class Mandarin {
           debug('getting translation', key);
           [translation] = await this.client.translate(safePhrase, locale);
           debug('got translation', translation);
-          await this.redisClient.set(key, translation);
+          if (this.redisClient) await this.redisClient.set(key, translation);
         }
 
         // replace `|` pipe character because translation will

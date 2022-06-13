@@ -1,0 +1,32 @@
+name: CI
+on:
+  - push
+  - pull_request
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        node_version:
+          - 14
+          - 16
+          - 18
+    name: Node ${{ matrix.node_version }} on ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Decrypt large secret
+        run: ./.github/scripts/decrypt_secret.sh
+        env:
+          LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node_version }}
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: $HOME/secrets/my_secret.json
+        run: npm run test

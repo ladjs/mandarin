@@ -1,23 +1,20 @@
 # mandarin
 
-[![build status](https://img.shields.io/travis/niftylettuce/mandarin.svg)](https://travis-ci.org/niftylettuce/mandarin)
-[![code coverage](https://img.shields.io/codecov/c/github/niftylettuce/mandarin.svg)](https://codecov.io/gh/niftylettuce/mandarin)
+[![build status](https://github.com/ladjs/mandarin/actions/workflows/ci.yml/badge.svg)](https://github.com/ladjs/mandarin/actions/workflows/ci.yml)
 [![code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![made with lass](https://img.shields.io/badge/made_with-lass-95CC28.svg)](https://lass.js.org)
-[![license](https://img.shields.io/github/license/niftylettuce/mandarin.svg)](LICENSE)
+[![license](https://img.shields.io/github/license/ladjs/mandarin.svg)](LICENSE)
 
 > Automatic i18n markdown translation and i18n phrase translation using Google Translate
-
-> **v2.0.0**: We have integrated Redis as a requirement for caching Google Translate responses (to save you money)
->
-> **v1.0.0**: We now use the official Node.js Google Translate package `@google-cloud/translate`
 
 
 ## Table of Contents
 
 * [Install](#install)
 * [Requirements](#requirements)
+  * [Redis](#redis)
+  * [Google Application Credentials](#google-application-credentials)
 * [Usage](#usage)
 * [Contributors](#contributors)
 * [License](#license)
@@ -31,16 +28,20 @@
 npm install mandarin
 ```
 
-[yarn][]:
-
-```sh
-yarn add mandarin
-```
-
 
 ## Requirements
 
-You will need to have [Redis][] installed.
+### Redis
+
+You will need to have [Redis][] installed in order for caching to work properly.
+
+If you do not plan to use Redis, then set `redis: false` as an option.
+
+### Google Application Credentials
+
+You will also need Google Application Credentials, and you will need to set them as environment variables (e.g. `GOOGLE_APPLICATION_CREDENTIALS=/home/user/Downloads/service-account-file.json`).
+
+For more information on Google Application credentials, see <https://cloud.google.com/docs/authentication/getting-started#setting_the_environment_variable>.
 
 
 ## Usage
@@ -161,8 +162,6 @@ GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/[FILE_NAME].json" node app.
 ##
 
 [npm]: https://www.npmjs.com/
-
-[yarn]: https://yarnpkg.com/
 
 [i18n]: https://github.com/ladjs/i18n
 

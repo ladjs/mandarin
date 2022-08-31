@@ -9,17 +9,20 @@ const autoLinkHeadings = require('remark-autolink-headings');
 const debug = require('debug')('mandarin');
 const emoji = require('remark-emoji');
 const globby = require('globby');
-const html = require('remark-html');
+const isSANB = require('is-string-and-not-blank');
 const languages = require('@cospired/i18n-iso-languages');
 const modifyFilename = require('modify-filename');
 const pMapSeries = require('p-map-series');
-const parse = require('remark-parse');
 const pify = require('pify');
+const rehypeRaw = require('rehype-raw');
+const rehypeRewrite = require('rehype-rewrite');
+const rehypeStringify = require('rehype-stringify');
+const remarkParse = require('remark-parse');
 const remarkPresetGitHub = require('remark-preset-github');
+const remarkRehype = require('remark-rehype');
 const revHash = require('rev-hash');
 const sharedConfig = require('@ladjs/shared-config');
 const slug = require('remark-slug');
-const textr = require('remark-textr');
 const unified = require('unified');
 const universalify = require('universalify');
 const vfile = require('to-vfile');
@@ -44,6 +47,12 @@ const DEFAULT_PATTERNS = [
   '!coverage',
   '!node_modules'
 ];
+
+function parsePreAndPostWhitespace(str) {
+  const value = str.trim();
+  const index = str.indexOf(value);
+  return [str.slice(0, index), value, str.slice(index + value.length)];
+}
 
 class Mandarin {
   constructor(config = {}) {
@@ -131,11 +140,9 @@ class Mandarin {
       locales.map((locale) => {
         return new Promise((resolve, reject) => {
           unified()
-            .use(parse)
+            // <https://unifiedjs.com/learn/recipe/remark-html/#how-to-properly-support-html-inside-markdown>
             .use(remarkPresetGitHub)
-            .use(textr, {
-              plugins: [(phrase) => this.config.i18n.api.t({ phrase, locale })]
-            })
+            .use(remarkParse)
             .use(slug)
             .use(autoLinkHeadings, {
               behavior: 'prepend',
@@ -149,7 +156,39 @@ class Mandarin {
               }
             })
             .use(emoji)
-            .use(html)
+            .use(remarkRehype, { allowDangerousHtml: true })
+            .use(rehypeRaw)
+            .data('settings', { fragment: true, emitParseErrors: true })
+            .use(rehypeRewrite, (node, index, parent) => {
+              if (
+                locale !== 'en' &&
+                node.type === 'text' &&
+                parent.tagName !== 'code' &&
+                isSANB(node.value) &&
+                node.value !== node.value.toUpperCase()
+              ) {
+                // if the `parent.tagName` is `code`
+                // or if the `node.value` is empty string (and not just \n either)
+                // or if the `node.value` when converted to uppercase is the same (e.g. abbreviation)
+                // then do not translate the value using i18n
+                // otherwise translate the value and set the new node value
+                //
+                // NOTE: we must strip the preceeding and succeeding whitespace and line breaks
+                //       and then add them back after the string is successfully translated
+                //
+                const [pre, phrase, post] = parsePreAndPostWhitespace(
+                  node.value
+                );
+                node.value =
+                  pre +
+                  this.config.i18n.api.t({
+                    phrase,
+                    locale
+                  }) +
+                  post;
+              }
+            })
+            .use(rehypeStringify)
             .process(markdown, (err, file) => {
               if (err) return reject(err);
               resolve({ locale, content: String(file) });
@@ -159,11 +198,12 @@ class Mandarin {
     );
     await Promise.all(
       files.map(async (file) => {
-        debug('writing file', filePath);
-        await writeFile(
-          this.getLocalizedMarkdownFileName(filePath, file.locale),
-          file.content
+        const localizedFilePath = this.getLocalizedMarkdownFileName(
+          filePath,
+          file.locale
         );
+        debug('writing file', localizedFilePath);
+        await writeFile(localizedFilePath, file.content);
       })
     );
   }
@@ -288,6 +328,8 @@ class Mandarin {
     });
   }
 }
+
+Mandarin.parsePreAndPostWhitespace = parsePreAndPostWhitespace;
 
 Mandarin.DEFAULT_PATTERNS = DEFAULT_PATTERNS;
 

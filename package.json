@@ -1,7 +1,7 @@
 {
   "name": "mandarin",
   "description": "Automatic i18n markdown translation and i18n phrase translation using Google Translate",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "author": "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)",
   "bugs": {
     "url": "https://github.com/ladjs/mandarin/issues",

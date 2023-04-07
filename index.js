@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
+const { isIP } = require('net');
 
 // const formatSpecifiers = require('format-specifiers');
 const Redis = require('@ladjs/redis');
@@ -9,6 +10,7 @@ const autoLinkHeadings = require('remark-autolink-headings');
 const debug = require('debug')('mandarin');
 const emoji = require('remark-emoji');
 const globby = require('globby');
+const isFQDN = require('is-fqdn');
 const isSANB = require('is-string-and-not-blank');
 const languages = require('@cospired/i18n-iso-languages');
 const modifyFilename = require('modify-filename');
@@ -27,6 +29,7 @@ const unified = require('unified');
 const universalify = require('universalify');
 const vfile = require('to-vfile');
 const { v2 } = require('@google-cloud/translate');
+const { isEmail } = require('validator');
 
 const isoCodes = Object.keys(languages.getAlpha2Codes());
 const writeFile = pify(fs.writeFile);
@@ -276,7 +279,6 @@ class Mandarin {
 
       // attempt to translate all of these in the given language
       await pMapSeries(translationsRequired, async (phrase) => {
-        const safePhrase = phrase;
         //
         // TODO: note that this will corrupt `<a href="%s"`>`
         // so I have turned it off for now until we have a better parser
@@ -294,7 +296,6 @@ class Mandarin {
         */
 
         debug('phrase', phrase);
-        debug('safePhrase', safePhrase);
 
         // TODO: also prevent {{...}} from getting translated
         // by wrapping such with `<span class="notranslate">`?
@@ -302,13 +303,18 @@ class Mandarin {
         // lookup translation result from cache
         const key = `${locale}:${revHash(phrase)}`;
         let translation;
-        if (this.redisClient) translation = await this.redisClient.get(key);
+
+        // do not translate if it is an email, FQDN, or IP
+        if (isEmail(phrase) || isFQDN(phrase) || isIP(phrase))
+          translation = phrase;
+        else if (this.redisClient)
+          translation = await this.redisClient.get(key);
         debug('translation', translation);
 
         // get the translation results from Google
         if (!_.isString(translation)) {
           debug('getting translation', key);
-          [translation] = await this.client.translate(safePhrase, locale);
+          [translation] = await this.client.translate(phrase, locale);
           debug('got translation', translation);
           if (this.redisClient) await this.redisClient.set(key, translation);
         }

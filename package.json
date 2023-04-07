@@ -22,6 +22,7 @@
     "@ladjs/shared-config": "^8.0.0",
     "debug": "^4.3.4",
     "globby": "11",
+    "is-fqdn": "^2.0.1",
     "is-string-and-not-blank": "^0.0.2",
     "lodash": "^4.17.21",
     "modify-filename": "1",
@@ -39,7 +40,8 @@
     "rev-hash": "3",
     "to-vfile": "6",
     "unified": "9",
-    "universalify": "^2.0.0"
+    "universalify": "^2.0.0",
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",

@@ -29,7 +29,7 @@ const unified = require('unified');
 const universalify = require('universalify');
 const vfile = require('to-vfile');
 const { v2 } = require('@google-cloud/translate');
-const { isEmail } = require('validator');
+const { isEmail, isURL } = require('validator');
 
 const isoCodes = Object.keys(languages.getAlpha2Codes());
 const writeFile = pify(fs.writeFile);
@@ -304,8 +304,8 @@ class Mandarin {
         const key = `${locale}:${revHash(phrase)}`;
         let translation;
 
-        // do not translate if it is an email, FQDN, or IP
-        if (isEmail(phrase) || isFQDN(phrase) || isIP(phrase))
+        // do not translate if it is an email, FQDN, URL, or IP
+        if (isEmail(phrase) || isFQDN(phrase) || isURL(phrase) || isIP(phrase))
           translation = phrase;
         else if (this.redisClient)
           translation = await this.redisClient.get(key);

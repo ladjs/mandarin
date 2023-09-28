@@ -314,20 +314,29 @@ class Mandarin {
         // get the translation results from Google
         if (!_.isString(translation)) {
           debug('getting translation', key);
-          [translation] = await this.client.translate(phrase, locale);
-          debug('got translation', translation);
-          if (this.redisClient) await this.redisClient.set(key, translation);
+          try {
+            [translation] = await this.client.translate(phrase, locale);
+          } catch (err) {
+            debug('error', err, 'key', key, 'phrase', phrase, 'locale', locale);
+          }
+
+          if (_.isString(translation)) {
+            debug('got translation', translation);
+            if (this.redisClient) await this.redisClient.set(key, translation);
+          }
         }
 
         // replace `|` pipe character because translation will
         // interpret as ranged interval
         // <https://github.com/mashpie/i18n-node/issues/274>
         // TODO: maybe use `he` package to re-encode entities?
-        file[phrase] = translation.replace(/\|/g, '&#124;');
+        if (_.isString(translation)) {
+          file[phrase] = translation.replace(/\|/g, '&#124;');
 
-        // write the file again
-        debug('writing filePath', filePath, 'with translation', translation);
-        await writeFile(filePath, JSON.stringify(file, null, 2));
+          // write the file again
+          debug('writing filePath', filePath, 'with translation', translation);
+          await writeFile(filePath, JSON.stringify(file, null, 2));
+        }
       });
 
       return file;

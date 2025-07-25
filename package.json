@@ -1,7 +1,7 @@
 {
   "name": "mandarin",
   "description": "Automatic i18n markdown translation and i18n phrase translation using Google Translate",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "author": "Nick Baugh <niftylettuce@gmail.com> (http://niftylettuce.com/)",
   "bugs": {
     "url": "https://github.com/ladjs/mandarin/issues",
@@ -26,6 +26,7 @@
     "is-string-and-not-blank": "^0.0.2",
     "lodash": "^4.17.21",
     "modify-filename": "1",
+    "p-map": "4.0.0",
     "p-map-series": "2",
     "pify": "5",
     "rehype-raw": "5",
@@ -106,6 +107,7 @@
   ],
   "license": "MIT",
   "main": "index.js",
+  "packageManager": "pnpm@9.15.9",
   "repository": {
     "type": "git",
     "url": "https://github.com/ladjs/mandarin"
@@ -116,6 +118,7 @@
     "prepare": "husky install",
     "pretest": "npm run lint",
     "test": "npm run test-coverage",
-    "test-coverage": "cross-env NODE_ENV=test nyc ava"
+    "test-coverage": "cross-env NODE_ENV=test nyc ava",
+    "test-protected-content": "node test/test-protected-content.js"
   }
 }

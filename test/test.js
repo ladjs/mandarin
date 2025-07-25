@@ -19,3 +19,4 @@ test('translates a basic phrase to multiple languages', async (t) => {
   await delay(1000);
   t.is(i18n.api.t({ phrase: 'Hello', locale: 'es' }), 'Hola');
 });
+

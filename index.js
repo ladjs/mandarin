@@ -599,6 +599,21 @@ class Mandarin {
           '$2 $1'
         );
 
+        // Fix custom IDs that are embedded within heading text
+        result = result.replace(
+          /^(#{1,6})\s+(.+?)(\{#[^}]+\})(.+?)$/gm,
+          (match, hashes, beforeText, customId, afterText) => {
+            // Remove any extra } characters and trim both parts
+            const cleanAfterText = afterText.replace(/^}+/, '').trim();
+            const cleanBeforeText = beforeText.trim();
+
+            // Concatenate directly and normalize spaces
+            const combinedText = `${cleanBeforeText}${cleanAfterText}`.replace(/\s+/g, ' ').trim();
+
+            return `${hashes} ${combinedText} ${customId}`;
+          }
+        );
+
         debug('writing file', localizedFilePath);
         await writeFile(localizedFilePath, result);
       })

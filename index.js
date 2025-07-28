@@ -6,9 +6,9 @@ const { isIP } = require('net');
 // const formatSpecifiers = require('format-specifiers');
 const Redis = require('@ladjs/redis');
 const _ = require('lodash');
-const autoLinkHeadings = require('remark-autolink-headings');
+// const autoLinkHeadings = require('remark-autolink-headings');
 const debug = require('debug')('mandarin');
-const emoji = require('remark-emoji');
+// const emoji = require('remark-emoji');
 const globby = require('globby');
 const isFQDN = require('is-fqdn');
 const isSANB = require('is-string-and-not-blank');
@@ -19,9 +19,10 @@ const pMapSeries = require('p-map-series');
 const pify = require('pify');
 const rehypeRaw = require('rehype-raw');
 const rehypeRewrite = require('rehype-rewrite');
-const rehypeStringify = require('rehype-stringify');
+// const rehypeStringify = require('rehype-stringify');
 const remarkParse = require('remark-parse');
 const remarkPresetGitHub = require('remark-preset-github');
+const remarkStringify = require('remark-stringify');
 const remarkRehype = require('remark-rehype');
 const revHash = require('rev-hash');
 const sharedConfig = require('@ladjs/shared-config');
@@ -31,6 +32,7 @@ const universalify = require('universalify');
 const vfile = require('to-vfile');
 const { v2 } = require('@google-cloud/translate');
 const { isEmail, isURL } = require('validator');
+const visit = require('unist-util-visit');
 
 const isoCodes = Object.keys(languages.getAlpha2Codes());
 const writeFile = pify(fs.writeFile);
@@ -58,6 +60,22 @@ function parsePreAndPostWhitespace(str) {
   const index = str.indexOf(value);
   return [str.slice(0, index), value, str.slice(index + value.length)];
 }
+
+// Custom plugin to add the {#id} syntax to the end of the heading text.
+const addCustomIdToHeadingText = () => (tree) => {
+  visit(tree, 'heading', (node) => {
+    // `remark-slug` has already added the ID to `node.properties.id`.
+    const slug = node.data?.id; // Use optional chaining for safety.
+
+    if (slug) {
+      // Append a new text node containing the custom ID syntax.
+      node.children.push({
+        type: 'text',
+        value: ` {#${slug}}`
+      });
+    }
+  });
+};
 
 // GitHub alert patterns
 const GITHUB_ALERT_PATTERNS = [
@@ -113,10 +131,6 @@ class Mandarin {
           }
         },
         //
-        // New option to enable text-based translation
-        //
-        useTextTranslation: true,
-        //
         // Concurrency limit for parallel translations
         //
         concurrency: 5
@@ -167,9 +181,9 @@ class Mandarin {
   }
 
   // Improved method for text-based markdown translation using Promise.all and p-map
-  async parseMarkdownFileText(filePath) {
-    debug('parseMarkdownFileText', filePath);
-    const content = await readFile(filePath, 'utf8');
+  async parseMarkdownFileText(content, locale) {
+    // debug('parseMarkdownFileText', filePath);
+    // const content = await readFile(filePath, 'utf8');
 
     // don't translate the main file.md file, only for other locales
     const locales = this.config.i18n.config.locales.filter(
@@ -517,17 +531,13 @@ class Mandarin {
   async parseMarkdownFile(filePath) {
     debug('parseMarkdownFile', filePath);
 
-    // Use text-based translation if enabled
-    if (this.config.useTextTranslation) {
-      return this.parseMarkdownFileText(filePath);
-    }
-
     // Original HTML-based implementation
     const markdown = await vfile.read(filePath);
     // don't translate the main file.md file, only for other locales
     const locales = this.config.i18n.config.locales.filter(
       (locale) => locale !== this.config.i18n.config.defaultLocale
     );
+
     const files = await Promise.all(
       locales.map((locale) => {
         return new Promise((resolve, reject) => {
@@ -536,51 +546,27 @@ class Mandarin {
             .use(remarkPresetGitHub)
             .use(remarkParse)
             .use(slug)
+            /*
             .use(autoLinkHeadings, {
-              behavior: 'prepend',
+              behavior: 'prepend', // Use 'prepend' or 'append', but NOT 'wrap'.
+              // The content for the new, separate link.
               content: {
-                type: 'element',
-                tagName: 'i',
-                properties: {
-                  className: ['fa', 'fa-link', 'mr-2', 'text-dark']
-                },
-                children: []
+                type: 'text',
+                value: '🔗', // Using an emoji for the link content.
+              },
+              // Link properties can be added if needed, e.g., for CSS classes.
+              properties: {
+                ariaHidden: 'true',
+                class: 'anchor'
               }
             })
-            .use(emoji)
-            .use(remarkRehype, { allowDangerousHtml: true })
-            .use(rehypeRaw)
-            .data('settings', { fragment: true, emitParseErrors: true })
-            .use(rehypeRewrite, (node, index, parent) => {
-              if (
-                locale !== 'en' &&
-                node.type === 'text' &&
-                parent.tagName !== 'code' &&
-                isSANB(node.value) &&
-                node.value !== node.value.toUpperCase()
-              ) {
-                // if the `parent.tagName` is `code`
-                // or if the `node.value` is empty string (and not just \n either)
-                // or if the `node.value` when converted to uppercase is the same (e.g. abbreviation)
-                // then do not translate the value using i18n
-                // otherwise translate the value and set the new node value
-                //
-                // NOTE: we must strip the preceeding and succeeding whitespace and line breaks
-                //       and then add them back after the string is successfully translated
-                //
-                const [pre, phrase, post] = parsePreAndPostWhitespace(
-                  node.value
-                );
-                node.value =
-                  pre +
-                  this.config.i18n.api.t({
-                    phrase,
-                    locale
-                  }) +
-                  post;
-              }
+            */
+            .use(addCustomIdToHeadingText)
+            .use(remarkStringify, {
+              // Important: This option prevents the processor from escaping the `{` and `}`
+              // characters in our custom ID.
+              fences: true
             })
-            .use(rehypeStringify)
             .process(markdown, (err, file) => {
               if (err) return reject(err);
               resolve({ locale, content: String(file) });
@@ -594,8 +580,9 @@ class Mandarin {
           filePath,
           file.locale
         );
+        const translatedContent = await this.translateMarkdownContent(file.content, file.locale);
         debug('writing file', localizedFilePath);
-        await writeFile(localizedFilePath, file.content);
+        await writeFile(localizedFilePath, translatedContent);
       })
     );
   }

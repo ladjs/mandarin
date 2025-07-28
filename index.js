@@ -78,12 +78,19 @@ const addCustomIdToHeadingText = () => (tree) => {
 };
 
 // GitHub alert patterns
+// const GITHUB_ALERT_PATTERNS = [
+//   { pattern: /^>\s*\\?\[!NOTE\].*(?:\n>\s*.*)*$/g, type: 'NOTE' },
+//   { pattern: /^>\s*\\?\[!TIP\].*(?:\n>\s*.*)*$/g, type: 'TIP' },
+//   { pattern: /^>\s*\\?\[!IMPORTANT\].*(?:\n>\s*.*)*$/g, type: 'IMPORTANT' },
+//   { pattern: /^>\s*\\?\[!WARNING\].*(?:\n>\s*.*)*$/g, type: 'WARNING' },
+//   { pattern: /^>\s*\\?\[!CAUTION\].*(?:\n>\s*.*)*$/g, type: 'CAUTION' }
+// ];
 const GITHUB_ALERT_PATTERNS = [
-  { pattern: /^>\s*\\?\[!NOTE\].*(?:\n>\s*.*)*$/gm, type: 'NOTE' },
-  { pattern: /^>\s*\\?\[!TIP\].*(?:\n>\s*.*)*$/gm, type: 'TIP' },
-  { pattern: /^>\s*\\?\[!IMPORTANT\].*(?:\n>\s*.*)*$/gm, type: 'IMPORTANT' },
-  { pattern: /^>\s*\\?\[!WARNING\].*(?:\n>\s*.*)*$/gm, type: 'WARNING' },
-  { pattern: /^>\s*\\?\[!CAUTION\].*(?:\n>\s*.*)*$/gm, type: 'CAUTION' }
+  { pattern: /^>\s*\\?\[!NOTE\].*$/gm, type: 'NOTE' },
+  { pattern: /^>\s*\\?\[!TIP\].*$/gm, type: 'TIP' },
+  { pattern: /^>\s*\\?\[!IMPORTANT\].*$/gm, type: 'IMPORTANT' },
+  { pattern: /^>\s*\\?\[!WARNING\].*$/gm, type: 'WARNING' },
+  { pattern: /^>\s*\\?\[!CAUTION\].*$/gm, type: 'CAUTION' }
 ];
 
 // Code block patterns

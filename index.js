@@ -169,9 +169,6 @@ class Mandarin {
     this.parseMarkdownFile = universalify
       .fromPromise(this.parseMarkdownFile)
       .bind(this);
-    this.parseMarkdownFileText = universalify
-      .fromPromise(this.parseMarkdownFileText)
-      .bind(this);
     this.getLocalizedMarkdownFileName = universalify
       .fromPromise(this.getLocalizedMarkdownFileName)
       .bind(this);
@@ -185,30 +182,6 @@ class Mandarin {
         isUpperCase ? locale.toUpperCase() : locale.toLowerCase()
       }${extension}`;
     });
-  }
-
-  // Improved method for text-based markdown translation using Promise.all and p-map
-  async parseMarkdownFileText(content, locale) {
-    // debug('parseMarkdownFileText', filePath);
-    // const content = await readFile(filePath, 'utf8');
-
-    // don't translate the main file.md file, only for other locales
-    const locales = this.config.i18n.config.locales.filter(
-      (locale) => locale !== this.config.i18n.config.defaultLocale
-    );
-
-    // Use Promise.all for parallel processing of all locales
-    await Promise.all(
-      locales.map(async (locale) => {
-        if (locale === 'en') return; // Skip English as it's typically the source
-
-        const translatedContent = await this.translateMarkdownContent(content, locale);
-        const localizedFilePath = this.getLocalizedMarkdownFileName(filePath, locale);
-
-        debug('writing file', localizedFilePath);
-        await writeFile(localizedFilePath, translatedContent);
-      })
-    );
   }
 
   // Helper method to detect and extract tables from content
@@ -502,8 +475,29 @@ class Mandarin {
       return text;
     }
 
+    // Protect placeholders within text by temporarily replacing them
+    const placeholderMap = new Map();
+    let placeholderCounter = 0;
+
+    // Find all placeholders in the text
+    const placeholderPattern = /__PROTECTED_\w+_\d+__/g;
+    let textToTranslate = text;
+
+    // Replace placeholders with temporary safe tokens
+    textToTranslate = textToTranslate.replace(placeholderPattern, (match) => {
+      const tempToken = `TEMP_PLACEHOLDER_${placeholderCounter}`;
+      placeholderMap.set(tempToken, match);
+      placeholderCounter++;
+      return tempToken;
+    });
+
+    // If the text is now empty or only contains temp tokens, don't translate
+    if (!textToTranslate.trim() || textToTranslate.match(/^TEMP_PLACEHOLDER_\d+$/)) {
+      return text;
+    }
+
     // Check cache first
-    const key = `${locale}:${revHash(text)}`;
+    const key = `${locale}:${revHash(textToTranslate)}`;
     let translation;
 
     if (this.redisClient) {
@@ -511,16 +505,15 @@ class Mandarin {
     }
 
     if (!_.isString(translation)) {
-      debug('getting translation for text:', text.substring(0, 50) + '...');
+      debug('getting translation for text:', textToTranslate.substring(0, 50) + '...');
       try {
-        // Use format: 'text' to preserve formatting
-        [translation] = await this.client.translate(text, {
+        [translation] = await this.client.translate(textToTranslate, {
           to: locale,
           format: 'text'
         });
       } catch (err) {
         debug('translation error:', err);
-        return text; // Return original text if translation fails
+        return text;
       }
 
       if (_.isString(translation)) {
@@ -531,8 +524,16 @@ class Mandarin {
       }
     }
 
-    // Don't replace pipe characters for table content - this was the main issue
-    return _.isString(translation) ? translation : text;
+    if (_.isString(translation)) {
+      // Restore the original placeholders
+      placeholderMap.forEach((originalPlaceholder, tempToken) => {
+        translation = translation.replace(new RegExp(tempToken, 'g'), originalPlaceholder);
+      });
+
+      return translation;
+    }
+
+    return text;
   }
 
   async parseMarkdownFile(filePath) {
@@ -545,51 +546,61 @@ class Mandarin {
       (locale) => locale !== this.config.i18n.config.defaultLocale
     );
 
-    const files = await Promise.all(
-      locales.map((locale) => {
-        return new Promise((resolve, reject) => {
-          unified()
-            // <https://unifiedjs.com/learn/recipe/remark-html/#how-to-properly-support-html-inside-markdown>
-            .use(remarkPresetGitHub)
-            .use(remarkParse)
-            .use(slug)
-            /*
-            .use(autoLinkHeadings, {
-              behavior: 'prepend', // Use 'prepend' or 'append', but NOT 'wrap'.
-              // The content for the new, separate link.
-              content: {
-                type: 'text',
-                value: '🔗', // Using an emoji for the link content.
-              },
-              // Link properties can be added if needed, e.g., for CSS classes.
-              properties: {
-                ariaHidden: 'true',
-                class: 'anchor'
-              }
-            })
-            */
-            .use(addCustomIdToHeadingText)
-            .use(remarkStringify, {
-              // Important: This option prevents the processor from escaping the `{` and `}`
-              // characters in our custom ID.
-              fences: true
-            })
-            .process(markdown, (err, file) => {
-              if (err) return reject(err);
-              resolve({ locale, content: String(file) });
-            });
+    const content = await new Promise((resolve, reject) => {
+      unified()
+        // <https://unifiedjs.com/learn/recipe/remark-html/#how-to-properly-support-html-inside-markdown>
+        .use(remarkPresetGitHub)
+        .use(remarkParse)
+        .use(slug)
+        /*
+        .use(autoLinkHeadings, {
+          behavior: 'prepend', // Use 'prepend' or 'append', but NOT 'wrap'.
+          // The content for the new, separate link.
+          content: {
+            type: 'text',
+            value: '🔗', // Using an emoji for the link content.
+          },
+          // Link properties can be added if needed, e.g., for CSS classes.
+          properties: {
+            ariaHidden: 'true',
+            class: 'anchor'
+          }
+        })
+        */
+        .use(addCustomIdToHeadingText)
+        .use(remarkStringify, {
+          // Important: This option prevents the processor from escaping the `{` and `}`
+          // characters in our custom ID.
+          fences: true
+        })
+        .process(markdown, (err, file) => {
+          if (err) return reject(err);
+          resolve(String(file));
         });
-      })
-    );
+    });
+
     await Promise.all(
-      files.map(async (file) => {
+      locales.map(async (locale) => {
         const localizedFilePath = this.getLocalizedMarkdownFileName(
           filePath,
-          file.locale
+          locale
         );
-        const translatedContent = await this.translateMarkdownContent(file.content, file.locale);
+        let result = await this.translateMarkdownContent(content, locale);
+
+        // Fix RTL reordering for headings with custom IDs
+        result = result.replace(
+          /^(.+?)\s+(#{1,6})\s+(\{#[^}]+\})$/gm,
+          '$2 $1 $3'
+        );
+
+        // Fix RTL reordering for headings without custom IDs
+        result = result.replace(
+          /^(.+?)\s+(#{1,6})$/gm,
+          '$2 $1'
+        );
+
         debug('writing file', localizedFilePath);
-        await writeFile(localizedFilePath, translatedContent);
+        await writeFile(localizedFilePath, result);
       })
     );
   }
@@ -702,7 +713,7 @@ class Mandarin {
 
           // get the translation results from Google
           if (!_.isString(translation)) {
-            debug('getting translation', key);
+            debug('getting translation', key, phrase);
             try {
               [translation] = await this.client.translate(phrase, {
                 to: locale,

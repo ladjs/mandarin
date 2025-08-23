@@ -17,7 +17,7 @@
   ],
   "dependencies": {
     "@cospired/i18n-iso-languages": "^4.0.0",
-    "@google-cloud/translate": "^7.0.1",
+    "@google-cloud/translate": "^8.0.0",
     "@ladjs/redis": "^1.0.7",
     "@ladjs/shared-config": "^8.0.0",
     "debug": "^4.3.4",
